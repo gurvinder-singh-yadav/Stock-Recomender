@@ -114,15 +114,18 @@ option = st.selectbox(
     get_stocks("grow")
 )
 
+col1, col2 = st.columns(2)
 
-st.subheader("Model 1")
-st.text("Description")
-st.subheader("Results : ")
-for stock in collFiltering(option):
-    st.markdown("-  "+stock)
+with col1:
+    st.subheader("Model 1")
+    st.text("Description")
+    st.subheader("Results : ")
+    for stock in collFiltering(option):
+        st.markdown("-  "+stock)
 
-st.subheader("Model 2")
-st.text("Description")
-st.subheader("Results : ")
-for stock in cosine_simi(option):
-    st.markdown("-  "+stock)
+with col2:
+    st.subheader("Model 2")
+    st.text("Description")
+    st.subheader("Results : ")
+    for stock in cosine_simi(option):
+        st.markdown("-  "+stock)
