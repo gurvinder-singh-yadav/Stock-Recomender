@@ -1,16 +1,25 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import numpy as np
 import pandas as pd
+import mpld3
+import datetime
 import os
 import pandas as pd 
 import numpy as np
+import matplotlib.pyplot as plt
 import warnings
 from sklearn.metrics.pairwise import cosine_similarity
 warnings.filterwarnings('ignore')
 
+today = str(datetime.date.today())
+
+
+
 @st.cache
-def train_model1():
-    df = pd.read_csv('data/grow/funds.csv')
+def train_model1(name:str = "grow"):
+    fund_path = "data/{}/{}/funds.csv".format(name ,today)
+    df = pd.read_csv(fund_path)
     stock_matrix_UII = df.pivot_table(index='funds_name', columns='Name', values='Assets(Rs_Cr.)')
     stock_matrix_UII.to_csv('models/model1.csv')
     return stock_matrix_UII.columns
@@ -34,8 +43,9 @@ def collFiltering(name : str, n:int = 10):
     return res["index"].tolist()[:n]
 
 @st.cache
-def train_model2():
-    df = pd.read_csv('data/grow/funds.csv')
+def train_model2(name:str = "grow"):
+    fund_path = "data/{}/{}/funds.csv".format(name ,today)
+    df = pd.read_csv(fund_path)
     stock_matrix_UII = df.pivot_table(index='funds_name', columns='Name', values='Assets(Rs_Cr.)')
     stock_matrix_UII.to_csv('models/model2.csv')
     return stock_matrix_UII.columns
@@ -77,14 +87,18 @@ def cosine_simi(name: str, n:int = 10):
 
 st.set_page_config(
     page_title="Stock Recommendations",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="auto"
 )
 
 st.title("Stock Recommendations")
 
+st.sidebar.markdown("Main Page")
+
 @st.cache
 def load_data(name: str, nrows:int = 50):
-    df = pd.read_csv("data/{}/funds.csv".format(name), nrows=nrows)
+    fund_path = "data/{}/{}/funds.csv".format(name ,today)
+    df = pd.read_csv(fund_path, nrows=nrows)
     return df
 
 st.subheader("Individual Stock Information of Mutual Funds listed on grow")
@@ -92,7 +106,8 @@ st.dataframe(load_data("grow"))
 
 @st.cache
 def get_stock_volume(name:str, n:int = 10):
-    df = pd.read_csv("data/{}/funds.csv".format(name))
+    fund_path = "data/{}/{}/funds.csv".format(name ,today)
+    df = pd.read_csv(fund_path)
     df = df[["Name", "Assets(Rs_Cr.)"]]
     df = df.groupby("Name").aggregate(sum).reset_index()
     df = df[["Name", "Assets(Rs_Cr.)"]].sort_values(by = "Assets(Rs_Cr.)", ascending=False)
@@ -102,7 +117,8 @@ def get_stock_volume(name:str, n:int = 10):
 
 @st.cache
 def get_stocks(name:str, n:int = 10):
-    df = pd.read_csv("data/{}/funds.csv".format(name))
+    fund_path = "data/{}/{}/funds.csv".format(name ,today)
+    df = pd.read_csv(fund_path)
     return df["Name"].unique().tolist()[:n]
 
 
@@ -118,14 +134,16 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("Model 1")
-    st.text("Description")
+    # st.text("Description")
+    st.text_area("Description", "Correlation is another measure of similarity that is commonly used in recommendation systems. Correlation measures the linear relationship between two variables. In the context of a recommendation system, the variables represent the user's past behavior and the items being recommended. The correlation between the two variables can be positive or negative, and the closer the correlation is to 1 (in absolute value), the stronger the relationship between the variables is considered to be.", height=200)
     st.subheader("Results : ")
     for stock in collFiltering(option):
         st.markdown("-  "+stock)
 
 with col2:
     st.subheader("Model 2")
-    st.text("Description")
+    st.text_area("Description", "Cosine similarity is a measure of similarity between two vectors in a multi-dimensional space. In the context of a recommendation system, the vectors represent the user's past behavior (e.g., items they have viewed or purchased) and the items being recommended. The cosine similarity between two vectors is calculated as the cosine of the angle between them. The closer the cosine similarity is to 1, the more similar the two vectors are considered to be.", height=200)
     st.subheader("Results : ")
     for stock in cosine_simi(option):
         st.markdown("-  "+stock)
+
